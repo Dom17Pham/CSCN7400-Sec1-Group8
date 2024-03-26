@@ -10,6 +10,8 @@
 #include <WinSock2.h>
 #include "DataPacket.h"
 
+#include "Common.h"
+
 #pragma comment(lib, "ws2_32.lib")
 const int PORT = 8080;
 
