@@ -1,3 +1,0 @@
-﻿  main.cpp
-C:\Users\dom17\Documents\Projects\TOC_System-Group08\Aircraft\main.cpp(53,53): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Aircraft.vcxproj -> C:\Users\dom17\Documents\Projects\TOC_System-Group08\x64\Debug\Aircraft.exe

@@ -1,3 +1,0 @@
-﻿  main.cpp
-C:\Users\dom17\Documents\Projects\TOC_System-Group08\GroundControl\main.cpp(70,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  GroundControl.vcxproj -> C:\Users\dom17\Documents\Projects\TOC_System-Group08\x64\Debug\GroundControl.exe
