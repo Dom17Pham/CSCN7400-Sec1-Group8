@@ -4,13 +4,13 @@
 #include <fstream>
 
 namespace common {
-	std::string readFile(const std::string& filename) {
+	std::string ReadFile(const std::string& filename) {
 		std::string content = "";
 		std::ifstream file(filename, std::ifstream::in);
 		if (file.is_open()) {
 			std::string line;
 			while (std::getline(file, line)) {
-				content += line + "\n";
+				content += line;
 			}
 			file.close();
 		}
@@ -18,7 +18,7 @@ namespace common {
 		return content;
 	}
 
-	bool writeFile(const std::string& filename, const std::string& content) {
+	bool WriteFile(const std::string& filename, const std::string& content) {
 		bool isWritten = false;
 		std::ofstream file(filename, std::ofstream::out);
 		if (file.is_open()) {
