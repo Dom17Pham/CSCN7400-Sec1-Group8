@@ -16,7 +16,6 @@ const char* SERVER_IP = "127.0.0.1"; // Server IP address
 const int PORT = 8080;
 
 int main() {
-    common::Print();
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 

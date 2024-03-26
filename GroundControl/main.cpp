@@ -9,7 +9,6 @@
 const int PORT = 8080;
 
 int main() {
-    common::Print();
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
