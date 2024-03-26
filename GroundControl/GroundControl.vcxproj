@@ -134,6 +134,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataPacket.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{4cd9e152-9793-493c-b907-1f42620df0e1}</Project>
     </ProjectReference>
