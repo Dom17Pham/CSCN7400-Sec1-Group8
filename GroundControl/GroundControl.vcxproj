@@ -76,7 +76,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+=======
+      <AdditionalIncludeDirectories>$(SolutionDir)Common/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+>>>>>>> adbeeba0d5132d5c73e1c2b5ad58e1e530002cdb
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -91,7 +95,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+=======
+      <AdditionalIncludeDirectories>$(SolutionDir)Common/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+>>>>>>> adbeeba0d5132d5c73e1c2b5ad58e1e530002cdb
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -106,7 +114,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+=======
+      <AdditionalIncludeDirectories>$(SolutionDir)Common/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+>>>>>>> adbeeba0d5132d5c73e1c2b5ad58e1e530002cdb
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +133,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+=======
+      <AdditionalIncludeDirectories>$(SolutionDir)Common/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+>>>>>>> adbeeba0d5132d5c73e1c2b5ad58e1e530002cdb
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
