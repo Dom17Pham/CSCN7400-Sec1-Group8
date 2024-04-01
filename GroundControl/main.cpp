@@ -8,9 +8,14 @@
 #include <sstream>
 #include <iomanip>
 #include "Common.h"
+#include <vector>
+#include <mutex>
+
 using namespace common;
 
 const int PORT = 8080;
+
+uint64_t controlID = generateUniqueID();
 
 void DisplayData(const DataPacket& packet) {
 
@@ -34,6 +39,34 @@ void DisplayData(const DataPacket& packet) {
     }
 }
 
+void ClientHandler(SOCKET client_socket) {
+
+    bool clientConnected = true;
+
+    while (clientConnected) {
+        DataPacket Recvpacket;
+        DataPacket Sendpacket;
+
+        auto now = std::chrono::system_clock::now();
+        auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+        uint64_t timestamp = milliseconds_since_epoch;
+
+        Recvpacket = receivePacket(client_socket);
+
+        DisplayData(Recvpacket);
+
+        Sendpacket.header.packetType = 0;
+        Sendpacket.header.timestamp = timestamp;
+        Sendpacket.header.sequenceNumber = Recvpacket.header.sequenceNumber + 1;
+        Sendpacket.payload0.controlID = controlID;
+        Sendpacket.payload0.controlCommands = 0;
+        Sendpacket.payload0.systemStatus = 1;
+        sendPacket(client_socket, Sendpacket);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    closesocket(client_socket);
+}
 
 int main() {
 
@@ -72,7 +105,6 @@ int main() {
         return -1;
     }
 
-    uint64_t controlID = generateUniqueID();
     std::cout << "Ground Control is listening on port " << PORT << std::endl;
     
     while (true) {
@@ -85,38 +117,8 @@ int main() {
             return -1;
         }
 
-        bool clientConnected = true;
-
-        while (clientConnected) {
-            DataPacket Recvpacket;
-            DataPacket Sendpacket;
-
-            auto now = std::chrono::system_clock::now();
-            auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-            uint64_t timestamp = milliseconds_since_epoch;
-
-            // Receive packet from client
-            int bytesReceived = recv(new_socket, reinterpret_cast<char*>(&Recvpacket), sizeof(DataPacket), 0);
-            if (bytesReceived <= 0) {
-                std::cerr << "Client disconnected" << std::endl;
-                clientConnected = false; 
-                break; 
-            }
-            Recvpacket = deserializePacket(reinterpret_cast<const char*>(&Recvpacket));
-            DisplayData(Recvpacket);
-
-            Sendpacket.header.packetType = 0;
-            Sendpacket.header.timestamp = timestamp;
-            Sendpacket.header.sequenceNumber = Recvpacket.header.sequenceNumber + 1;
-            Sendpacket.payload0.controlID = controlID;
-            Sendpacket.payload0.controlCommands = 0;
-            Sendpacket.payload0.systemStatus = 1;
-            std::string serializedPacket = serializePacket(Sendpacket);
-            send(new_socket, serializedPacket.c_str(), serializedPacket.size(), 0);
-
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-        closesocket(new_socket); 
+        std::thread clientThread(ClientHandler, new_socket);
+        clientThread.detach();
     }
 
     closesocket(server_fd);

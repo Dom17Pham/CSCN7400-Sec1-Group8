@@ -53,7 +53,7 @@ namespace common {
     void getTimeStamp(const DataPacket& packet);
     uint32_t calculateChecksum(const DataPacket& packet);
     void sendPacket(SOCKET sock, const DataPacket& packet);
-    void receivePacket(SOCKET sock, DataPacket& packet);
+    DataPacket receivePacket(SOCKET sock);
     std::string serializePacket(const DataPacket& packet);
     DataPacket deserializePacket(const char* buffer);
 

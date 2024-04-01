@@ -51,19 +51,31 @@ namespace common {
 
 	void sendPacket(SOCKET sock, const DataPacket& packet) {
 
-		uint32_t checksum = calculateChecksum(packet);
 		DataPacket packetToSend = packet;
+		uint32_t checksum = calculateChecksum(packet);
 		packetToSend.CRCchecksum = checksum;
-		send(sock, reinterpret_cast<const char*>(&packetToSend), sizeof(DataPacket), 0);
+
+		std::string serializedPacket = serializePacket(packetToSend);
+
+		send(sock, serializedPacket.c_str(), serializedPacket.size(), 0);
 	}
 
-	void receivePacket(SOCKET sock, DataPacket& packet) {
+	DataPacket receivePacket(SOCKET sock) {
+		DataPacket packet;
+		char buffer[sizeof(DataPacket)];
 
-		recv(sock, reinterpret_cast<char*>(&packet), sizeof(DataPacket), 0);
-		uint32_t calculatedChecksum = calculateChecksum(packet);
-		//if (packet.CRCchecksum != calculatedChecksum) {
-		//    std::cerr << "Checksum validation failed" << std::endl;
+		recv(sock, buffer, sizeof(buffer), 0);
+		packet = deserializePacket(buffer);
+
+		//uint32_t receivedChecksum = packet.CRCchecksum;
+		//uint32_t calculatedChecksum = calculateChecksum(packet);
+		//if (receivedChecksum != calculatedChecksum) {
+		//	std::cerr << "Checksum validation failed. Received checksum: " << receivedChecksum << ". Calculated checksum: " << calculatedChecksum << std::endl;
 		//}
+		//else {
+		//	std::cerr << "Checksum validation success" << std::endl;
+		//}
+		return packet;
 	}
 
 	std::string serializePacket(const DataPacket& packet) {

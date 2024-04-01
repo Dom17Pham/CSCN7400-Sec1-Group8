@@ -64,15 +64,15 @@ int main() {
         auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
         uint64_t timestamp = milliseconds_since_epoch;
 
-        DataPacket Recvpacket;
         DataPacket Sendpacket;
+        DataPacket Recvpacket;
+
         Sendpacket.header.timestamp = timestamp;
         Sendpacket.payload1.aircraftID = aircraftID;
         Sendpacket.header.packetType = 1;
         Sendpacket.header.sequenceNumber = sequenceNum;
         sequenceNum++;
-        std::string serializedPacket = serializePacket(Sendpacket);
-        send(sock, serializedPacket.c_str(), serializedPacket.size(), 0);
+        sendPacket(sock, Sendpacket);
 
         fd_set readSet;
         FD_ZERO(&readSet);
@@ -82,8 +82,7 @@ int main() {
         timeout.tv_usec = 0;
         int selectResult = select(sock + 1, &readSet, nullptr, nullptr, &timeout);
         if (selectResult > 0 && FD_ISSET(sock, &readSet)) {
-            DataPacket Recvpacket;
-            receivePacket(sock, Recvpacket);
+            Recvpacket = receivePacket(sock);
             DisplayData(Recvpacket);
         }
 
