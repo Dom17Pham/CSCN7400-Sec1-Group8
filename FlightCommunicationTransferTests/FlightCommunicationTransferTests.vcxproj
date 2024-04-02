@@ -158,6 +158,7 @@
   <ItemGroup>
     <ClCompile Include="CommonTests.cpp" />
     <ClCompile Include="FlightCommunicationTransferTests.cpp" />
+    <ClCompile Include="MapTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.vcxproj">

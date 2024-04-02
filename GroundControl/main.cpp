@@ -11,13 +11,11 @@
 #include <vector>
 #include <mutex>
 
-using namespace common;
-
 const int BASE_PORT = 8080;
 
 uint64_t controlID = -1;
 
-void DisplayData(const DataPacket& packet) {
+void DisplayData(const common::DataPacket& packet) {
 
     std::cout << std::endl;
 
@@ -41,6 +39,9 @@ void DisplayData(const DataPacket& packet) {
         std::cout << "Control Commands: " << packet.payload0.controlCommands << std::endl;
         std::cout << "System Status: " << packet.payload0.systemStatus << std::endl;
     }
+    else {
+        std::cout << std::endl;
+    }
 }
 
 void ClientHandler(SOCKET client_socket) {
@@ -48,14 +49,14 @@ void ClientHandler(SOCKET client_socket) {
     bool clientConnected = true;
 
     while (clientConnected) {
-        DataPacket Recvpacket;
-        DataPacket Sendpacket;
+        common::DataPacket Recvpacket;
+        common::DataPacket Sendpacket;
 
         auto now = std::chrono::system_clock::now();
         auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
         uint64_t timestamp = milliseconds_since_epoch;
 
-        Recvpacket = receivePacket(client_socket);
+        Recvpacket = common::receivePacket(client_socket);
 
         DisplayData(Recvpacket);
 
@@ -69,7 +70,7 @@ void ClientHandler(SOCKET client_socket) {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    closesocket(client_socket);
+    int rv = closesocket(client_socket);
 }
 
 int main(int argc, char* argv[]) {
@@ -92,7 +93,7 @@ int main(int argc, char* argv[]) {
 
     // Network Initialization
     WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
+    int rv = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     SOCKET server_fd, new_socket;
     struct sockaddr_in address;
@@ -100,7 +101,8 @@ int main(int argc, char* argv[]) {
     int addrlen = sizeof(address);
 
     // Create socket
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+    server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (server_fd == INVALID_SOCKET) {
         std::cerr << "Socket creation error" << std::endl;
         WSACleanup();
         return -1;
@@ -113,16 +115,16 @@ int main(int argc, char* argv[]) {
     // Bind socket 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
         std::cerr << "Bind failed" << std::endl;
-        closesocket(server_fd);
-        WSACleanup();
+        rv = closesocket(server_fd);
+        rv = WSACleanup();
         return -1;
     }
 
     // Listen for connections
     if (listen(server_fd, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Listen failed" << std::endl;
-        closesocket(server_fd);
-        WSACleanup();
+        rv = closesocket(server_fd);
+        rv = WSACleanup();
         return -1;
     }
 
@@ -131,10 +133,11 @@ int main(int argc, char* argv[]) {
     while (true) {
 
         // Accept incoming connection
-        if ((new_socket = accept(server_fd, (struct sockaddr*)&address, &addrlen)) == INVALID_SOCKET) {
+        new_socket = accept(server_fd, (struct sockaddr*)&address, &addrlen);
+        if (new_socket == INVALID_SOCKET) {
             std::cerr << "Accept failed" << std::endl;
-            closesocket(server_fd);
-            WSACleanup();
+            rv = closesocket(server_fd);
+            rv = WSACleanup();
             return -1;
         }
 
@@ -142,7 +145,7 @@ int main(int argc, char* argv[]) {
         clientThread.detach();
     }
 
-    closesocket(server_fd);
-    WSACleanup();
+    rv = closesocket(server_fd);
+    rv = WSACleanup();
     return 0;
 }

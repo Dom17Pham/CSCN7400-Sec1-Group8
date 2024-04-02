@@ -29,7 +29,7 @@ namespace aircraft {
 		std::cout << "----------------\n";
 		std::cout << "Not Latitude: " << currentLocation.x << "\n";
 		std::cout << "Not Longitude: " << currentLocation.y << "\n";
-		std::cout << "Flight Trip Completion Percentage: " << flightCompletionPercentage * 100 << "%\n";
+		std::cout << "Flight Trip Completion Percentage: " << flightCompletionPercentage * 100.0 << "%\n";
 	}
 
 	// Update Aircraft Location based on percentage of the flight completed. 1 Second = 1 Percent.

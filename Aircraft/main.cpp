@@ -11,15 +11,14 @@
 #include <ctime>
 #include "Common.h"
 #include "Aircraft.h"
-using namespace common;
 
 const char* SERVER_IP = "127.0.0.1"; // Server IP address
 const int BASE_PORT = 8080;
 
-void DisplayData(const DataPacket& packet) {
+void DisplayData(const common::DataPacket& packet) {
 
 	std::cout << std::endl;
-	getTimeStamp(packet);
+	common::getTimeStamp(packet);
 	std::cout << "Sequence Number: " << packet.header.sequenceNumber << std::endl;
 	std::cout << "Ground Control ID: " << packet.payload0.controlID << std::endl;
 	std::cout << "Control Commands: " << packet.payload0.controlCommands << std::endl;
@@ -52,15 +51,19 @@ int main(int argc, char* argv[]) {
 
 		// Network Initialization
 		WSADATA wsaData;
-		WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData)) {
+			return -1;
+		}	
 
 		SOCKET sock = INVALID_SOCKET;
 		struct sockaddr_in server;
 
 		// Create socket
-		if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+		sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		if (sock == INVALID_SOCKET) {
 			std::cerr << "Socket creation error" << std::endl;
-			WSACleanup();
+			int rv = WSACleanup();
 			return -1;
 		}
 
@@ -69,10 +72,11 @@ int main(int argc, char* argv[]) {
 		server.sin_addr.s_addr = inet_addr(SERVER_IP);
 
 		// Connect to server
-		if (connect(sock, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
+		int rv = connect(sock, (struct sockaddr*)&server, sizeof(server));
+		if (rv == SOCKET_ERROR) {
 			std::cerr << "Connection Failed" << std::endl;
-			closesocket(sock);
-			WSACleanup();
+			rv = closesocket(sock);
+			rv = WSACleanup();
 			return -1;
 		}
 
@@ -88,9 +92,9 @@ int main(int argc, char* argv[]) {
 			auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 			uint64_t timestamp = milliseconds_since_epoch;
 
-			DataPacket Sendpacket;
-			DataPacket Recvpacket;
-			AircraftPayload aircraftPayload = {
+			common::DataPacket Sendpacket;
+			common::DataPacket Recvpacket;
+			common::AircraftPayload aircraftPayload = {
 				(uint64_t)aircraftID,
 				aircraft.getCurrentLocation().x,
 				aircraft.getCurrentLocation().y,
@@ -111,7 +115,7 @@ int main(int argc, char* argv[]) {
 			timeout.tv_usec = 0;
 			int selectResult = select(sock + 1, &readSet, nullptr, nullptr, &timeout);
 			if (selectResult > 0 && FD_ISSET(sock, &readSet)) {
-				Recvpacket = receivePacket(sock);
+				Recvpacket = common::receivePacket(sock);
 				DisplayData(Recvpacket);
 			}
 

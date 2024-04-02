@@ -57,14 +57,14 @@ namespace common {
 
 		std::string serializedPacket = serializePacket(packetToSend);
 
-		send(sock, serializedPacket.c_str(), serializedPacket.size(), 0);
+		int rv = send(sock, serializedPacket.c_str(), serializedPacket.size(), 0);
 	}
 
 	DataPacket receivePacket(SOCKET sock) {
 		DataPacket packet;
 		char buffer[sizeof(DataPacket)];
 
-		recv(sock, buffer, sizeof(buffer), 0);
+		int rv = recv(sock, buffer, sizeof(buffer), 0);
 		packet = deserializePacket(buffer);
 
 		//uint32_t receivedChecksum = packet.CRCchecksum;
