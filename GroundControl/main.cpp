@@ -15,13 +15,14 @@ using namespace common;
 
 const int BASE_PORT = 8080;
 
-uint64_t controlID = generateUniqueID();
+uint64_t controlID = -1;
 
 void DisplayData(const DataPacket& packet) {
 
     std::cout << std::endl;
 
     std::cout << "\x1B[2J\x1B[H"; //Clear Console Screen
+    std::cout << "Ground Control ID: " << controlID << std::endl;
 
     getTimeStamp(packet);
     std::cout << "Sequence Number: " << packet.header.sequenceNumber << std::endl;
@@ -79,6 +80,7 @@ int main(int argc, char* argv[]) {
     }
 
     int groundControlID = std::stoi(argv[1]);
+    controlID  = groundControlID;
 
     if (groundControlID < 1 || groundControlID > 10) {
         std::cerr << "Please only enter one program argument with an integer of range 1 - 10.\n";
