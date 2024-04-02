@@ -7,70 +7,20 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
-#include <WinSock2.h>
-#include "DataPacket.h"
-
 #include "Common.h"
+#include <vector>
+#include <mutex>
 
-#pragma comment(lib, "ws2_32.lib")
+using namespace common;
+
 const int PORT = 8080;
 
-uint32_t calculateChecksum(const DataPacket& packet) {
-
-    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&packet);
-    uint32_t checksum = 0;
-    for (size_t i = 0; i < sizeof(DataPacket); ++i) {
-        checksum += bytes[i];
-    }
-    return checksum;
-}
-
-uint64_t generateUniqueID() {
-    srand(static_cast<unsigned>(time(nullptr)));
-    uint64_t id = rand() % 1000 * 1000 + rand() % 1000;
-    return id;
-}
-
-void sendPacket(SOCKET sock, const DataPacket& packet) {
-
-    uint32_t checksum = calculateChecksum(packet);
-
-    DataPacket packetToSend = packet;
-
-    packetToSend.CRCchecksum = checksum;
-
-    send(sock, reinterpret_cast<const char*>(&packetToSend), sizeof(DataPacket), 0);
-}
-
-void receivePacket(SOCKET sock, DataPacket& packet) {
-
-    recv(sock, reinterpret_cast<char*>(&packet), sizeof(DataPacket), 0);
-    uint32_t calculatedChecksum = calculateChecksum(packet);
-    //if (packet.CRCchecksum != calculatedChecksum) {
-    //    std::cerr << "Checksum validation failed" << std::endl;
-    //}
-}
-
-std::string serializePacket(const DataPacket& packet) {
-    std::ostringstream oss;
-    oss.write(reinterpret_cast<const char*>(&packet), sizeof(DataPacket));
-    return oss.str();
-}
-
-DataPacket deserializePacket(const char* buffer) {
-    DataPacket packet;
-    memcpy(&packet, buffer, sizeof(DataPacket));
-    return packet;
-}
+uint64_t controlID = generateUniqueID();
 
 void DisplayData(const DataPacket& packet) {
 
     std::cout << std::endl;
-    std::chrono::system_clock::time_point time_point = std::chrono::system_clock::time_point(std::chrono::milliseconds(packet.header.timestamp));
-    std::time_t time = std::chrono::system_clock::to_time_t(time_point);
-    std::ostringstream oss;
-    oss << std::put_time(gmtime(&time), "%Y-%m-%d %H:%M:%S UTC");
-    std::cout << "Timestamp: " << oss.str() << std::endl;
+    getTimeStamp(packet);
     std::cout << "Sequence Number: " << packet.header.sequenceNumber << std::endl;
 
     if (packet.header.packetType == 1) { 
@@ -89,6 +39,34 @@ void DisplayData(const DataPacket& packet) {
     }
 }
 
+void ClientHandler(SOCKET client_socket) {
+
+    bool clientConnected = true;
+
+    while (clientConnected) {
+        DataPacket Recvpacket;
+        DataPacket Sendpacket;
+
+        auto now = std::chrono::system_clock::now();
+        auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+        uint64_t timestamp = milliseconds_since_epoch;
+
+        Recvpacket = receivePacket(client_socket);
+
+        DisplayData(Recvpacket);
+
+        Sendpacket.header.packetType = 0;
+        Sendpacket.header.timestamp = timestamp;
+        Sendpacket.header.sequenceNumber = Recvpacket.header.sequenceNumber + 1;
+        Sendpacket.payload0.controlID = controlID;
+        Sendpacket.payload0.controlCommands = 0;
+        Sendpacket.payload0.systemStatus = 1;
+        sendPacket(client_socket, Sendpacket);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    closesocket(client_socket);
+}
 
 int main() {
 
@@ -127,7 +105,6 @@ int main() {
         return -1;
     }
 
-    uint64_t controlID = generateUniqueID();
     std::cout << "Ground Control is listening on port " << PORT << std::endl;
     
     while (true) {
@@ -140,38 +117,8 @@ int main() {
             return -1;
         }
 
-        bool clientConnected = true;
-
-        while (clientConnected) {
-            DataPacket Recvpacket;
-            DataPacket Sendpacket;
-
-            auto now = std::chrono::system_clock::now();
-            auto milliseconds_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-            uint64_t timestamp = milliseconds_since_epoch;
-
-            // Receive packet from client
-            int bytesReceived = recv(new_socket, reinterpret_cast<char*>(&Recvpacket), sizeof(DataPacket), 0);
-            if (bytesReceived <= 0) {
-                std::cerr << "Client disconnected" << std::endl;
-                clientConnected = false; 
-                break; 
-            }
-            Recvpacket = deserializePacket(reinterpret_cast<const char*>(&Recvpacket));
-            DisplayData(Recvpacket);
-
-            Sendpacket.header.packetType = 0;
-            Sendpacket.header.timestamp = timestamp;
-            Sendpacket.header.sequenceNumber = Recvpacket.header.sequenceNumber + 1;
-            Sendpacket.payload0.controlID = controlID;
-            Sendpacket.payload0.controlCommands = 0;
-            Sendpacket.payload0.systemStatus = 1;
-            std::string serializedPacket = serializePacket(Sendpacket);
-            send(new_socket, serializedPacket.c_str(), serializedPacket.size(), 0);
-
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-        closesocket(new_socket); 
+        std::thread clientThread(ClientHandler, new_socket);
+        clientThread.detach();
     }
 
     closesocket(server_fd);
