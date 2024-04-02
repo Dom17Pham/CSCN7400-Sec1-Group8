@@ -28,6 +28,16 @@ void DisplayData(const DataPacket& packet) {
 
 
 int main() {
+    // Set log file path
+    Logger::setLogFile("aircraft.log");
+
+    // Use the common logging library
+    Logger::log(LogLevel::INFO, "Aircraft application started.");
+    // Perform client-specific tasks
+
+    Logger::log(LogLevel::INFO, "Aircraft application finished.");
+
+
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
