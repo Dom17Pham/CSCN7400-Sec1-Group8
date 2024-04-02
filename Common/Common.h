@@ -6,11 +6,6 @@
 #pragma comment(lib, "ws2_32.lib")
 
 namespace common {
-	struct Location {
-		double x;
-		double y;
-	};
-
 	std::string ReadFile(const std::string& filename);
 	bool WriteFile(const std::string& filename, const std::string& content);
 
@@ -56,5 +51,4 @@ namespace common {
     DataPacket receivePacket(SOCKET sock);
     std::string serializePacket(const DataPacket& packet);
     DataPacket deserializePacket(const char* buffer);
-
 }
