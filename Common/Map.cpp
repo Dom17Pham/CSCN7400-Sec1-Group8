@@ -11,11 +11,11 @@ namespace common {
 	Boundary Map::GetBoundaryFromLocationAndExtends(Location location, Location extends)
 	{
 		// Calculates rect bound
-		double minX = location.x - extends.x;
-		double right = location.x + extends.x;
-		double top = location.y + extends.y;
-		double bottom = location.y - extends.y;
-		return Boundary{ minX, right, top, bottom };
+		double xMin = location.x - extends.x;
+		double xMax = location.x + extends.x;
+		double yMin = location.y - extends.y;
+		double yMax = location.y + extends.y;
+		return Boundary{ xMin, xMax, yMin, yMax };
 	}
 
 	bool Map::isLocationInsideBoundary(Location location, Boundary boundary)
