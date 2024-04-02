@@ -13,13 +13,16 @@
 
 using namespace common;
 
-const int PORT = 8080;
+const int BASE_PORT = 8080;
 
 uint64_t controlID = generateUniqueID();
 
 void DisplayData(const DataPacket& packet) {
 
     std::cout << std::endl;
+
+    std::cout << "\x1B[2J\x1B[H"; //Clear Console Screen
+
     getTimeStamp(packet);
     std::cout << "Sequence Number: " << packet.header.sequenceNumber << std::endl;
 
@@ -68,8 +71,24 @@ void ClientHandler(SOCKET client_socket) {
     closesocket(client_socket);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Program Startup
+    if (argc > 2) {
+        std::cerr << "Please only enter one program argument with an integer of range 1 - 10.\n";
+        return -1;
+    }
 
+    int groundControlID = std::stoi(argv[1]);
+
+    if (groundControlID < 1 || groundControlID > 10) {
+        std::cerr << "Please only enter one program argument with an integer of range 1 - 10.\n";
+        return -1;
+    }
+
+    // Each instance of ground control get its own port, up to 10 instances.
+    const int GROUND_CONTROL_PORT = BASE_PORT + groundControlID - 1;
+
+    // Network Initialization
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -87,7 +106,7 @@ int main() {
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(GROUND_CONTROL_PORT);
 
     // Bind socket 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
@@ -105,7 +124,7 @@ int main() {
         return -1;
     }
 
-    std::cout << "Ground Control is listening on port " << PORT << std::endl;
+    std::cout << "Ground Control is listening on port " << GROUND_CONTROL_PORT << std::endl;
     
     while (true) {
 
