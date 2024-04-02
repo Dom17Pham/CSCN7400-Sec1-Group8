@@ -8,6 +8,37 @@
 #include <iomanip>
 
 namespace common {
+
+	std::ofstream Logger::logFileStream;
+
+	void Logger::setLogFile(const std::string& filePath) {
+		logFileStream.open(filePath);
+	}
+
+	void Logger::log(LogLevel level, const std::string& message) {
+		logFileStream << "[" << logLevelToString(level) << "] " << message << std::endl;
+	}
+
+	std::string Logger::logLevelToString(LogLevel level) {
+		switch (level) {
+		case LogLevel::DEBUG:
+			return "DEBUG";
+		case LogLevel::INFO:
+			return "INFO";
+		case LogLevel::WARNING:
+			return "WARNING";
+		case LogLevel::ERRORS:
+			return "ERROR";
+		default:
+			return "UNKNOWN";
+		}
+	}
+
+
+
+
+
+
 	std::string ReadFile(const std::string& filename) {
 		std::string content = "";
 		std::ifstream file(filename, std::ifstream::in);

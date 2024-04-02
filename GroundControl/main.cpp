@@ -69,6 +69,12 @@ void ClientHandler(SOCKET client_socket) {
 }
 
 int main() {
+    // set up log file  
+    Logger::setLogFile("ground-control-server.log");
+    // write that the client application has started
+    Logger::log(LogLevel::INFO, "Ground control server application started.");
+
+
 
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -120,6 +126,8 @@ int main() {
         std::thread clientThread(ClientHandler, new_socket);
         clientThread.detach();
     }
+
+    Logger::log(LogLevel::INFO, "Ground Controller application finished.");
 
     closesocket(server_fd);
     WSACleanup();
